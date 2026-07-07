@@ -1,0 +1,15 @@
+venv/
+
+artifacts/
+
+logs/
+
+mlruns/
+
+__pycache__/
+
+*.pyc
+
+models/*.pkl
+
+.ipynb_checkpoints/
