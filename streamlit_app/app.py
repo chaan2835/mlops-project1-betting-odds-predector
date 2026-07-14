@@ -15,6 +15,7 @@ st.markdown("---")
 
 col1, col2, col3 = st.columns(3)
 
+...
 #########################################################
 # FastAPI
 #########################################################
@@ -55,38 +56,46 @@ with col1:
 #########################################################
 # MLflow
 #########################################################
-
 with col2:
 
     st.subheader("MLflow")
 
     if st.button("Start MLflow"):
 
-        subprocess.run(
-            ["pkill", "-f", "mlflow"],
-            check=False
+        result = subprocess.run(
+            ["pgrep", "-f", "mlflow server"],
+            capture_output=True,
+            text=True
         )
 
-        subprocess.Popen([
-            "mlflow",
-            "ui",
-            "--host",
-            "0.0.0.0",
-            "--port",
-            "5001"
-        ])
+        if not result.stdout.strip():
 
-        time.sleep(5)
+            subprocess.Popen([
+                "mlflow",
+                "server",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "5001",
+                "--backend-store-uri",
+                "sqlite:////tmp/mlflow/mlflow.db",
+                "--allowed-hosts",
+                "*",
+                "--cors-allowed-origins",
+                "*"
+            ])
 
-        mlflow_url = (
-            "https://chandrasekhardec20961-5001.eastus.instances.azureml.ms"
-        )
+            time.sleep(10)
 
-        st.success("MLflow Started")
+            st.success("MLflow Started")
+
+        else:
+
+            st.info("MLflow already running")
 
         st.link_button(
             "Open MLflow Dashboard",
-            mlflow_url
+            "https://chandrasekhardec20961-5001.eastus.instances.azureml.ms"
         )
 
 #########################################################
