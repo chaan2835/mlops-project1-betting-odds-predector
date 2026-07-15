@@ -163,7 +163,7 @@ class ModelTrainer:
 
             )
 
-            y = df["Prediction_Correct"].to_numpy()
+            y = df["Prediction_Correct"]
 
             ####################################################
             # Train Test Split
