@@ -16,6 +16,10 @@ MLFLOW_REGISTERED_MODEL_NAME = os.getenv(
     "MLFLOW_REGISTERED_MODEL_NAME"
 )
 
+MLFLOW_RUN_NAME = os.getenv(
+    "MLFLOW_RUN_NAME"
+)
+
 ####################################################
 # PROJECT ROOT
 ####################################################

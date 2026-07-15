@@ -9,7 +9,9 @@ from src.exception import CustomException
 
 from src.config import (
     MLFLOW_TRACKING_URI,
-    MLFLOW_EXPERIMENT_NAME
+    MLFLOW_EXPERIMENT_NAME,
+    MLFLOW_REGISTERED_MODEL_NAME,
+    MLFLOW_RUN_NAME
 )
 
 
