@@ -4,6 +4,7 @@ import sys
 import mlflow
 import pandas as pd
 
+from datetime import datetime
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
@@ -354,12 +355,23 @@ class ModelTrainer:
             # Save Preprocessor
             ####################################################
 
+            timestamp = datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
+
+            preprocessor_version_path = os.path.join(
+                os.path.dirname(PREPROCESSOR_PATH),
+                f"preprocessor_{timestamp}.pkl"
+            )
+
             save_object(
-
-                PREPROCESSOR_PATH,
-
+                preprocessor_version_path,
                 preprocessor
+            )
 
+            save_object(
+                PREPROCESSOR_PATH,
+                preprocessor
             )
 
             ####################################################
@@ -511,22 +523,38 @@ class ModelTrainer:
 
             logger.info("=" * 60)
 
+
             ####################################################
-            # Save Best Model
+            # Versioned Model Save
             ####################################################
 
+            timestamp = datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
+
+            model_version_path = os.path.join(
+                os.path.dirname(MODEL_PATH),
+                f"{best_model_name.replace(' ', '_')}_{timestamp}.pkl"
+            )
+
+            # Save versioned model
             save_object(
-
-                MODEL_PATH,
-
+                model_version_path,
                 best_model
+            )
 
+            # Save latest model for API consumption
+            save_object(
+                MODEL_PATH,
+                best_model
             )
 
             logger.info(
+                f"Versioned Model Saved : {model_version_path}"
+            )
 
-                "Best Model Saved Successfully"
-
+            logger.info(
+                f"Latest Model Saved : {MODEL_PATH}"
             )
 
             ####################################################
