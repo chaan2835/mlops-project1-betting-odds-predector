@@ -48,20 +48,13 @@ class MLflowLogger:
     ####################################################
     # Enable Auto Logging
     ####################################################
+def enable_autolog(self):
 
-    def enable_autolog(self):
+    logger.info(
+        "MLflow Autolog Disabled"
+    )
 
-        try:
-
-            logger.info(
-                "Enabling MLflow Auto Logging"
-            )
-
-            return
-
-        except Exception as e:
-
-            raise CustomException(e, sys)
+    return    
 
     ####################################################
     # Start Run
