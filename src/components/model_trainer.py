@@ -360,9 +360,7 @@ class ModelTrainer:
             # Initialize MLflow
             ####################################################
    
-            self.mlflow_logger.start_run(
-    MLFLOW_RUN_NAME
-)
+            run = self.mlflow_logger.start_run(MLFLOW_RUN_NAME)
 
             ####################################################
             # Models
@@ -593,23 +591,11 @@ class ModelTrainer:
             # Log Custom Artifacts
             ####################################################
 
-            artifact_files = [
+            artifact_files = [TRAIN_DATA_PATH,TEST_DATA_PATH,
 
-                TRAIN_DATA_PATH,
+                CLASSIFICATION_REPORT_PATH,FEATURE_IMPORTANCE_PATH,
 
-                TEST_DATA_PATH,
-
-                METRICS_PATH,
-
-                CLASSIFICATION_REPORT_PATH,
-
-                FEATURE_IMPORTANCE_PATH,
-
-                CONFUSION_MATRIX_PATH,
-
-                ROC_CURVE_PATH
-
-            ]
+                CONFUSION_MATRIX_PATH,ROC_CURVE_PATH]
 
             self.mlflow_logger.log_artifacts(
 
@@ -697,14 +683,17 @@ class ModelTrainer:
             # Log metrics.json to MLflow
             ####################################################
 
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+            metrics_path = os.path.join(os.path.dirname(METRICS_PATH),
+                f"metrics_{timestamp}.json")
+
+            save_json(metrics_path,metrics)
+
             self.mlflow_logger.log_artifacts(
-
                 [
-
-                    METRICS_PATH
-
+                    metrics_path
                 ]
-
             )
 
             ####################################################
@@ -721,14 +710,6 @@ class ModelTrainer:
 
                 "f1_score": metrics["f1_score"],
 
-                "roc_auc": metrics["roc_auc"]
-            }
-
-            mlflow_metrics = {
-                "accuracy": metrics["accuracy"],
-                "precision": metrics["precision"],
-                "recall": metrics["recall"],
-                "f1_score": metrics["f1_score"],
                 "roc_auc": metrics["roc_auc"]
             }
 
