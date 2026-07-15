@@ -377,9 +377,7 @@ class ModelTrainer:
             ####################################################
             # Initialize MLflow
             ####################################################
-
-            self.mlflow_logger.enable_autolog()
-
+   
             run = self.mlflow_logger.start_run(
 
                 MLFLOW_RUN_NAME
