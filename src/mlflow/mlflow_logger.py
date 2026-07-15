@@ -240,18 +240,18 @@ def enable_autolog(self):
 
     def end_run(self):
 
-    try:
+        try:
 
-        if mlflow.active_run():
+            if mlflow.active_run():
 
-            mlflow.end_run()
+                mlflow.end_run()
 
-            logger.info(
-                "MLflow Run Ended Successfully"
+                logger.info(
+                    "MLflow Run Ended Successfully"
+                )
+
+        except Exception as e:
+
+            logger.error(
+                f"Error Ending MLflow Run: {str(e)}"
             )
-
-    except Exception as e:
-
-        logger.error(
-            f"Error Ending MLflow Run: {str(e)}"
-        )
