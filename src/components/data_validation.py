@@ -62,26 +62,38 @@ def validate_dataset():
 
         missing = df.isnull().sum()
 
-        print("\nMissing Values\n")
+        print("\nMissing Values Before Imputation\n")
         print(missing)
 
         logger.info("Checking missing values")
 
-        missing_columns = missing[missing > 0]
+        numeric_columns = [
+            "Home_Team_Odds",
+            "Away_Team_Odds",
+            "Draw_Odds"
+        ]
 
-        if len(missing_columns) > 0:
+        for col in numeric_columns:
 
-            logger.warning(
-                f"Missing values found:\n{missing_columns}"
-            )
+            if df[col].isnull().sum() > 0:
 
-            print("\nWARNING: Missing Values Found\n")
+                mean_value = df[col].mean()
 
-            print(missing_columns)
+                df[col].fillna(
+                    mean_value,
+                    inplace=True
+                )
 
-        else:
+                logger.info(
+                    f"{col} missing values filled with mean: {mean_value:.4f}"
+                )
 
-            logger.info("No Missing Values Found")
+        missing_after = df.isnull().sum()
+
+        print("\nMissing Values After Imputation\n")
+        print(missing_after)
+
+        logger.info("Missing value treatment completed")
 
         # ---------------------------------------------------
         # Odds Validation
