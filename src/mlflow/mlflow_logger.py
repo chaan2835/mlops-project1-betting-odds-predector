@@ -59,11 +59,11 @@ class MLflowLogger:
 
             mlflow.sklearn.autolog(
 
-                log_models=True,
+                log_models=False,
 
-                log_input_examples=True,
+                #log_input_examples=True,
 
-                log_model_signatures=True,
+                #log_model_signatures=True,
 
                 silent=False
 
