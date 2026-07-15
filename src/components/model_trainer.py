@@ -1,13 +1,17 @@
+import os
 import sys
+
+import mlflow
 import pandas as pd
 
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-from src.evaluation.model_evaluation import ModelEvaluation
 
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import (
+    OneHotEncoder,
+    StandardScaler
+)
 
 from sklearn.model_selection import train_test_split
 
@@ -28,13 +32,33 @@ from src.utils import (
     evaluate_model
 )
 
+from src.evaluation.model_evaluation import ModelEvaluation
+from src.mlflow.mlflow_logger import MLflowLogger
+
 from src.config import (
+
     PROCESSED_DATA_PATH,
+
     MODEL_PATH,
+
     PREPROCESSOR_PATH,
+
     METRICS_PATH,
+
     TRAIN_DATA_PATH,
+
     TEST_DATA_PATH,
+
+    CLASSIFICATION_REPORT_PATH,
+
+    FEATURE_IMPORTANCE_PATH,
+
+    CONFUSION_MATRIX_PATH,
+
+    ROC_CURVE_PATH,
+
+    MLFLOW_RUN_NAME
+
 )
 
 
@@ -44,68 +68,83 @@ class ModelTrainer:
 
         logger.info("Model Trainer Initialized")
 
+        self.mlflow_logger = MLflowLogger()
+
+    ####################################################
+    # Model Training
+    ####################################################
 
     def initiate_model_training(self):
 
         try:
 
-            logger.info("=" * 60)
+            logger.info("=" * 70)
             logger.info("MODEL TRAINING STARTED")
-            logger.info("=" * 60)
+            logger.info("=" * 70)
 
             ####################################################
             # Read Dataset
             ####################################################
 
-            df = pd.read_csv(PROCESSED_DATA_PATH)
+            df = pd.read_csv(
+                PROCESSED_DATA_PATH
+            )
 
-            logger.info(f"Dataset Shape : {df.shape}")
+            logger.info(
+                f"Dataset Shape : {df.shape}"
+            )
 
             ####################################################
-            # Create Target Column
+            # Create Target
             ####################################################
 
-            logger.info("Creating Prediction_Correct")
+            logger.info(
+                "Creating Prediction_Correct"
+            )
 
             df["Prediction_Correct"] = (
-                df["Predicted_Winner"] ==
+
+                df["Predicted_Winner"]
+
+                ==
+
                 df["Actual_Winner"]
+
             ).astype(int)
 
             print("\nTarget Distribution\n")
 
-            print(df["Prediction_Correct"].value_counts())
+            print(
+                df["Prediction_Correct"].value_counts()
+            )
 
             print("\nPercentage\n")
 
-            print(df["Prediction_Correct"].value_counts(normalize=True))
-
-            logger.info("Target Created Successfully")
-
-            logger.info(
-                f"\nTarget Distribution\n"
-                f"{df['Prediction_Correct'].value_counts()}"
+            print(
+                df["Prediction_Correct"]
+                .value_counts(normalize=True)
             )
 
             ####################################################
-            # Features
+            # Features / Target
             ####################################################
 
             X = df.drop(
-                columns=[
-                    "Prediction_Correct",
-                    "Actual_Winner"
-                ]
-            )
 
-            ####################################################
-            # Target
-            ####################################################
+                columns=[
+
+                    "Prediction_Correct",
+
+                    "Actual_Winner"
+
+                ]
+
+            )
 
             y = df["Prediction_Correct"]
 
             ####################################################
-            # Split
+            # Train Test Split
             ####################################################
 
             X_train, X_test, y_train, y_test = train_test_split(
@@ -122,10 +161,46 @@ class ModelTrainer:
 
             )
 
-            logger.info("Train Test Split Completed")
+            ####################################################
+            # Save Train/Test CSV
+            ####################################################
+
+            os.makedirs(
+
+                os.path.dirname(
+                    TRAIN_DATA_PATH
+                ),
+
+                exist_ok=True
+
+            )
+
+            train_df = X_train.copy()
+
+            train_df["Prediction_Correct"] = y_train.values
+
+            train_df.to_csv(
+
+                TRAIN_DATA_PATH,
+
+                index=False
+
+            )
+
+            test_df = X_test.copy()
+
+            test_df["Prediction_Correct"] = y_test.values
+
+            test_df.to_csv(
+
+                TEST_DATA_PATH,
+
+                index=False
+
+            )
 
             ####################################################
-            # Numeric Columns
+            # Feature Lists
             ####################################################
 
             numerical_columns = [
@@ -137,10 +212,6 @@ class ModelTrainer:
                 "Draw_Odds"
 
             ]
-
-            ####################################################
-            # Categorical Columns
-            ####################################################
 
             categorical_columns = [
 
@@ -221,7 +292,7 @@ class ModelTrainer:
             )
 
             ####################################################
-            # Combine Pipelines
+            # Preprocessor
             ####################################################
 
             preprocessor = ColumnTransformer(
@@ -252,10 +323,8 @@ class ModelTrainer:
 
             )
 
-            logger.info("Preprocessor Created")
-
             ####################################################
-            # Fit
+            # Transform Data
             ####################################################
 
             X_train = preprocessor.fit_transform(
@@ -265,8 +334,6 @@ class ModelTrainer:
             X_test = preprocessor.transform(
                 X_test
             )
-
-            logger.info("Preprocessing Completed")
 
             ####################################################
             # Save Preprocessor
@@ -280,99 +347,105 @@ class ModelTrainer:
 
             )
 
-            logger.info(
-                "Preprocessor Saved Successfully"
+            ####################################################
+            # Initialize MLflow
+            ####################################################
+
+            self.mlflow_logger.enable_autolog()
+
+            run = self.mlflow_logger.start_run(
+
+                MLFLOW_RUN_NAME
+
             )
 
-            ####################################################
+                       ####################################################
             # Models
             ####################################################
 
             models = {
 
-                "Logistic Regression":
+                "Logistic Regression": LogisticRegression(
 
-                    LogisticRegression(
-                        max_iter=1000,
-                        random_state=42
-                    ),
+                    max_iter=1000,
 
-                "Decision Tree":
+                    random_state=42
 
-                    DecisionTreeClassifier(
-                        max_depth=10,
-                        min_samples_split=5,
-                        random_state=42
-                    ),
+                ),
 
-                "Random Forest":
+                "Decision Tree": DecisionTreeClassifier(
 
-                    RandomForestClassifier(
+                    max_depth=10,
 
-                        n_estimators=300,
+                    min_samples_split=5,
 
-                        max_depth=15,
+                    random_state=42
 
-                        min_samples_split=5,
+                ),
 
-                        min_samples_leaf=2,
+                "Random Forest": RandomForestClassifier(
 
-                        random_state=42,
+                    n_estimators=300,
 
-                        n_jobs=-1
+                    max_depth=15,
 
-                    ),
+                    min_samples_split=5,
 
-                "Gradient Boosting":
+                    min_samples_leaf=2,
 
-                    GradientBoostingClassifier(
+                    random_state=42,
 
-                        n_estimators=200,
+                    n_jobs=-1
 
-                        learning_rate=0.05,
+                ),
 
-                        max_depth=5,
+                "Gradient Boosting": GradientBoostingClassifier(
 
-                        random_state=42
+                    n_estimators=200,
 
-                    ),
+                    learning_rate=0.05,
 
-                "Extra Trees":
+                    max_depth=5,
 
-                    ExtraTreesClassifier(
+                    random_state=42
 
-                        n_estimators=300,
+                ),
 
-                        random_state=42,
+                "Extra Trees": ExtraTreesClassifier(
 
-                        n_jobs=-1
+                    n_estimators=300,
 
-                    )
+                    random_state=42,
+
+                    n_jobs=-1
+
+                )
 
             }
-            logger.info(
-                "Models Initialized Successfully"
-            )
 
-                        ####################################################
-            # Train Models
+            logger.info("Models Initialized Successfully")
+
+            ####################################################
+            # Model Training
             ####################################################
 
             model_report = {}
 
-            best_f1 = 0.0
-
             best_model = None
 
-            best_model_name = ""
+            best_model_name = None
+
+            best_f1 = -1
 
             logger.info("=" * 60)
-            logger.info("MODEL TRAINING STARTED")
+
+            logger.info("Training All Models")
+
             logger.info("=" * 60)
 
             for model_name, model in models.items():
 
-                logger.info(f"Training {model_name}")
+                logger.info(f"Training : {model_name}")
 
                 report = evaluate_model(
 
@@ -389,8 +462,6 @@ class ModelTrainer:
                 )
 
                 model_report[model_name] = report
-
-                logger.info(f"{model_name} Results")
 
                 logger.info(report)
 
@@ -410,7 +481,7 @@ class ModelTrainer:
 
             logger.info(f"Best Model : {best_model_name}")
 
-            logger.info(f"F1 Score   : {best_f1}")
+            logger.info(f"Best F1    : {best_f1:.4f}")
 
             logger.info("=" * 60)
 
@@ -426,42 +497,125 @@ class ModelTrainer:
 
             )
 
-            logger.info("Best Model Saved Successfully")
+            logger.info(
+
+                "Best Model Saved Successfully"
+
+            )
 
             ####################################################
             # Model Evaluation
             ####################################################
 
-            logger.info("Starting Model Evaluation")
+            logger.info("Evaluating Best Model")
 
-            evaluation = ModelEvaluation()
+            prediction = best_model.predict(
 
-            prediction = best_model.predict(X_test)
+                X_test
 
-            evaluation.save_classification_report(
-                y_test,
-                prediction
             )
 
-            evaluation.save_confusion_matrix(
+            evaluator = ModelEvaluation()
+
+            evaluator.save_classification_report(
+
                 y_test,
+
                 prediction
+
             )
 
-            evaluation.save_roc_curve(
+            evaluator.save_confusion_matrix(
+
+                y_test,
+
+                prediction
+
+            )
+
+            evaluator.save_roc_curve(
+
                 best_model,
+
                 X_test,
+
                 y_test
+
             )
 
-            evaluation.save_feature_importance(
+            evaluator.save_feature_importance(
+
                 best_model,
+
                 preprocessor
+
             )
 
-            logger.info("Model Evaluation Completed")
+            logger.info(
+
+                "Model Evaluation Completed"
+
+            )
 
             ####################################################
+            # Log Custom Artifacts
+            ####################################################
+
+            artifact_files = [
+
+                TRAIN_DATA_PATH,
+
+                TEST_DATA_PATH,
+
+                METRICS_PATH,
+
+                CLASSIFICATION_REPORT_PATH,
+
+                FEATURE_IMPORTANCE_PATH,
+
+                CONFUSION_MATRIX_PATH,
+
+                ROC_CURVE_PATH
+
+            ]
+
+            self.mlflow_logger.log_artifacts(
+
+                artifact_files
+
+            )
+
+            ####################################################
+            # Log Tags
+            ####################################################
+
+            self.mlflow_logger.log_tags({
+
+                "Project": "Sports Betting MLOps",
+
+                "Developer": "Chandra Sekhar",
+
+                "Environment": "Azure",
+
+                "Algorithm": best_model_name,
+
+                "Framework": "Scikit-Learn"
+
+            })
+
+            ####################################################
+            # Register Best Model
+            ####################################################
+
+            self.mlflow_logger.register_model(
+
+                best_model,
+
+                "Sports_Betting_Model"
+
+            )
+
+                        ####################################################
             # Save Metrics
             ####################################################
 
@@ -469,17 +623,51 @@ class ModelTrainer:
 
                 "best_model": best_model_name,
 
-                "accuracy": round(model_report[best_model_name]["accuracy"], 4),
+                "accuracy": round(
 
-                "precision": round(model_report[best_model_name]["precision"], 4),
+                    model_report[best_model_name]["accuracy"],
 
-                "recall": round(model_report[best_model_name]["recall"], 4),
+                    4
 
-                "f1_score": round(model_report[best_model_name]["f1_score"], 4),
+                ),
 
-                "roc_auc": round(model_report[best_model_name]["roc_auc"], 4)
+                "precision": round(
+
+                    model_report[best_model_name]["precision"],
+
+                    4
+
+                ),
+
+                "recall": round(
+
+                    model_report[best_model_name]["recall"],
+
+                    4
+
+                ),
+
+                "f1_score": round(
+
+                    model_report[best_model_name]["f1_score"],
+
+                    4
+
+                ),
+
+                "roc_auc": round(
+
+                    model_report[best_model_name]["roc_auc"],
+
+                    4
+
+                )
 
             }
+
+            ####################################################
+            # Save metrics.json
+            ####################################################
 
             save_json(
 
@@ -489,33 +677,87 @@ class ModelTrainer:
 
             )
 
-            logger.info("Metrics Saved Successfully")
+            logger.info(
+
+                "metrics.json Saved Successfully"
+
+            )
 
             ####################################################
-            # Display Results
+            # Log metrics.json to MLflow
+            ####################################################
+
+            self.mlflow_logger.log_artifacts(
+
+                [
+
+                    METRICS_PATH
+
+                ]
+
+            )
+
+            ####################################################
+            # Log Custom Metrics
+            ####################################################
+
+            self.mlflow_logger.log_metrics(
+
+                metrics
+
+            )
+
+            ####################################################
+            # Log Custom Parameters
+            ####################################################
+
+            self.mlflow_logger.log_parameters(
+
+                {
+
+                    "Best_Model": best_model_name,
+
+                    "Training_Samples": len(y_train),
+
+                    "Testing_Samples": len(y_test),
+
+                    "Numerical_Features": len(numerical_columns),
+
+                    "Categorical_Features": len(categorical_columns)
+
+                }
+
+            )
+
+            ####################################################
+            # Close MLflow Run
+            ####################################################
+
+            self.mlflow_logger.end_run()
+
+            ####################################################
+            # Console Output
             ####################################################
 
             print("\n")
 
-            print("=" * 60)
+            print("=" * 70)
 
             print("MODEL TRAINING COMPLETED")
 
-            print("=" * 60)
+            print("=" * 70)
 
-            print(f"Best Model : {best_model_name}")
+            print(f"\nBest Model : {best_model_name}")
 
-            print("\n")
+            print(f"Accuracy   : {metrics['accuracy']:.4f}")
 
-            print(f"Accuracy  : {metrics['accuracy']:.4f}")
+            print(f"Precision  : {metrics['precision']:.4f}")
 
-            print(f"Precision : {metrics['precision']:.4f}")
+            print(f"Recall     : {metrics['recall']:.4f}")
 
-            print(f"Recall    : {metrics['recall']:.4f}")
+            print(f"F1 Score   : {metrics['f1_score']:.4f}")
 
-            print(f"F1 Score  : {metrics['f1_score']:.4f}")
-
-            print(f"ROC AUC   : {metrics['roc_auc']:.4f}")
+            print(f"ROC AUC    : {metrics['roc_auc']:.4f}")
 
             print("\nDetailed Report\n")
 
@@ -525,15 +767,21 @@ class ModelTrainer:
 
                 print(report)
 
-                print("-" * 50)
+                print("-" * 60)
 
-                print("\n")
+            print("\n")
 
-            print("=" * 60)
+            print("=" * 70)
 
-            print("Artifacts Generated")
+            print("MLFLOW EXPERIMENT LOGGED SUCCESSFULLY")
 
-            print("=" * 60)
+            print("=" * 70)
+
+            print("Artifacts")
+
+            print("✔ train.csv")
+
+            print("✔ test.csv")
 
             print("✔ model.pkl")
 
@@ -543,11 +791,11 @@ class ModelTrainer:
 
             print("✔ classification_report.txt")
 
+            print("✔ feature_importance.csv")
+
             print("✔ confusion_matrix.png")
 
             print("✔ roc_curve.png")
-
-            print("✔ feature_importance.csv")
 
             ####################################################
             # Return
@@ -564,5 +812,11 @@ class ModelTrainer:
             )
 
         except Exception as e:
+
+            logger.error(str(e))
+
+            if mlflow.active_run():
+
+                self.mlflow_logger.end_run()
 
             raise CustomException(e, sys)
