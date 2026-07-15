@@ -91,18 +91,22 @@ def enable_autolog(self):
             for artifact in artifact_list:
 
                 if os.path.exists(artifact):
+                    print("OS path exists")
 
                     logger.info(
                         f"Uploading : {artifact}"
                     )
 
+                    print("xxxxxxxxxxxx")
+
                     mlflow.log_artifact(
                         artifact
                     )
 
+                    print("xxxxxxxxxxxxx")
+
             logger.info(
-                "Artifacts Logged Successfully"
-            )
+                "Artifacts Logged Successfully")
 
         except Exception as e:
 
