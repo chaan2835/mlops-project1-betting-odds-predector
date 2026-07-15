@@ -163,7 +163,10 @@ if os.path.exists(METRICS_PATH):
 
         st.metric(
             "Best Model",
-            metrics["best_model"]
+            metrics.get(
+            "best_model",
+            "Not Available"
+            )
         )
 
         st.metric(
