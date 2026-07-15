@@ -670,34 +670,29 @@ class ModelTrainer:
             ####################################################
 
             metrics = {
-
                 "best_model": best_model_name,
-
                 "accuracy": round(
                     model_report[best_model_name]["accuracy"],
                     4
                 ),
-
                 "precision": round(
                     model_report[best_model_name]["precision"],
                     4
                 ),
-
                 "recall": round(
                     model_report[best_model_name]["recall"],
                     4
                 ),
-
                 "f1_score": round(
                     model_report[best_model_name]["f1_score"],
                     4
                 ),
-
                 "roc_auc": round(
                     model_report[best_model_name]["roc_auc"],
                     4
                 )
             }
+
             ####################################################
             # Save metrics.json
             ####################################################
@@ -747,9 +742,18 @@ class ModelTrainer:
                 "roc_auc": metrics["roc_auc"]
             }
 
+            mlflow_metrics = {
+                "accuracy": metrics["accuracy"],
+                "precision": metrics["precision"],
+                "recall": metrics["recall"],
+                "f1_score": metrics["f1_score"],
+                "roc_auc": metrics["roc_auc"]
+            }
+
             self.mlflow_logger.log_metrics(
                 mlflow_metrics
             )
+
 
             ####################################################
             # Log Custom Parameters
