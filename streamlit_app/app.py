@@ -1,200 +1,289 @@
-import json
 import os
-import subprocess
-import webbrowser
-
-from dotenv import load_dotenv
-from PIL import Image
-
+import json
+import requests
 import streamlit as st
+from dotenv import load_dotenv
 
 load_dotenv()
+
+###############################################################
+# PAGE CONFIG
+###############################################################
+
+st.set_page_config(
+    page_title="Sports Betting MLOps Dashboard",
+    page_icon="⚽",
+    layout="wide"
+)
+
+###############################################################
+# ENV VARIABLES
+###############################################################
 
 FASTAPI_URL = os.getenv("FASTAPI_URL")
 MLFLOW_URL = os.getenv("MLFLOW_URL")
 
-if not FASTAPI_URL:
-    raise ValueError("FASTAPI_URL is not set in the .env file.")
+###############################################################
+# PROJECT PATHS
+###############################################################
 
-if not MLFLOW_URL:
-    raise ValueError("MLFLOW_URL is not set in the .env file.")
+METRICS_PATH = "artifacts/reports/metrics.json"
 
-METRICS_FILE = "artifacts/reports/metrics.json"
+MODEL_PATH = "artifacts/models/model.pkl"
 
-CONFUSION_MATRIX = "artifacts/plots/confusion_matrix.png"
+PREPROCESSOR_PATH = "artifacts/models/preprocessor.pkl"
 
 ROC_CURVE = "artifacts/plots/roc_curve.png"
 
-FEATURE_IMPORTANCE = "artifacts/reports/feature_importance.csv"
+CONFUSION_MATRIX = "artifacts/plots/confusion_matrix.png"
 
-st.set_page_config(
-    page_title="Sports Betting MLOps Dashboard",
-    layout="wide"
-)
+###############################################################
+# HELPERS
+###############################################################
+
+def fastapi_status():
+
+    try:
+
+        response = requests.get(
+            FASTAPI_URL,
+            timeout=5
+        )
+
+        return response.status_code == 200
+
+    except:
+
+        return False
+
+
+def mlflow_status():
+
+    try:
+
+        response = requests.get(
+            MLFLOW_URL,
+            timeout=5
+        )
+
+        return response.status_code == 200
+
+    except:
+
+        return False
+
+
+###############################################################
+# TITLE
+###############################################################
 
 st.title("⚽ Sports Betting MLOps Dashboard")
 
-st.divider()
+st.markdown(
+"""
+End-to-End Machine Learning Operations Project
 
-###########################################################
-# TOP BUTTONS
-###########################################################
+**Technology Stack**
 
-col1, col2, col3 = st.columns(3)
-
-###########################################################
-# FASTAPI
-###########################################################
-
-with col1:
-
-    st.subheader("FastAPI")
-
-    if st.button("Start FastAPI"):
-
-        subprocess.Popen([
-            "uvicorn",
-            "api.app:app",
-            "--host",
-            "0.0.0.0",
-            "--port",
-            "8000"
-        ])
-
-        st.success("FastAPI Started")
-
-    st.link_button(
-        "Open Swagger",
-        FASTAPI_URL + "/docs"
-    )
-
-###########################################################
-# MLFLOW
-###########################################################
-
-with col2:
-
-    st.subheader("MLflow")
-
-    if st.button("Start MLflow"):
-
-        subprocess.Popen([
-
-            "mlflow",
-
-            "server",
-
-            "--host",
-
-            "0.0.0.0",
-
-            "--port",
-
-            "5001"
-
-        ])
-
-        st.success("MLflow Started")
-
-    st.link_button(
-        "Open MLflow",
-        MLFLOW_URL
-    )
-
-###########################################################
-# ARTIFACTS
-###########################################################
-
-with col3:
-
-    st.subheader("Artifacts")
-
-    if st.button("Open Artifacts"):
-
-        webbrowser.open("artifacts")
+- Scikit-Learn
+- FastAPI
+- Streamlit
+- MLflow
+- Azure
+"""
+)
 
 st.divider()
 
-###########################################################
+###############################################################
+# SYSTEM HEALTH
+###############################################################
+
+st.subheader("🖥️ System Health")
+
+c1, c2, c3, c4 = st.columns(4)
+
+with c1:
+
+    if fastapi_status():
+
+        st.success("FastAPI Running")
+
+    else:
+
+        st.error("FastAPI Down")
+
+with c2:
+
+    if mlflow_status():
+
+        st.success("MLflow Running")
+
+    else:
+
+        st.error("MLflow Down")
+
+with c3:
+
+    if os.path.exists(MODEL_PATH):
+
+        st.success("Model Available")
+
+    else:
+
+        st.error("Model Missing")
+
+with c4:
+
+    if os.path.exists(PREPROCESSOR_PATH):
+
+        st.success("Preprocessor Available")
+
+    else:
+
+        st.error("Preprocessor Missing")
+
+st.divider()
+
+###############################################################
 # MODEL METRICS
-###########################################################
+###############################################################
 
-st.header("Model Metrics")
+st.subheader("📊 Latest Model Performance")
 
-if os.path.exists(METRICS_FILE):
+if os.path.exists(METRICS_PATH):
 
-    with open(METRICS_FILE) as file:
+    with open(METRICS_PATH) as file:
 
         metrics = json.load(file)
 
-    c1, c2, c3, c4, c5 = st.columns(5)
+    m1, m2, m3 = st.columns(3)
 
-    c1.metric(
-        "Accuracy",
-        metrics["accuracy"]
-    )
+    with m1:
 
-    c2.metric(
-        "Precision",
-        metrics["precision"]
-    )
+        st.metric(
+            "Best Model",
+            metrics["best_model"]
+        )
 
-    c3.metric(
-        "Recall",
-        metrics["recall"]
-    )
+        st.metric(
+            "Accuracy",
+            f"{metrics['accuracy']:.4f}"
+        )
 
-    c4.metric(
-        "F1 Score",
-        metrics["f1_score"]
-    )
+    with m2:
 
-    c5.metric(
-        "ROC AUC",
-        metrics["roc_auc"]
-    )
+        st.metric(
+            "Precision",
+            f"{metrics['precision']:.4f}"
+        )
+
+        st.metric(
+            "Recall",
+            f"{metrics['recall']:.4f}"
+        )
+
+    with m3:
+
+        st.metric(
+            "F1 Score",
+            f"{metrics['f1_score']:.4f}"
+        )
+
+        st.metric(
+            "ROC AUC",
+            f"{metrics['roc_auc']:.4f}"
+        )
+
+else:
+
+    st.warning("metrics.json not found.")
 
 st.divider()
 
-###########################################################
-# REPORTS
-###########################################################
+###############################################################
+# QUICK ACTIONS
+###############################################################
 
-st.header("Evaluation Reports")
+st.subheader("🚀 Quick Actions")
 
-left, right = st.columns(2)
+a1, a2 = st.columns(2)
 
-with left:
+with a1:
+
+    st.link_button(
+
+        "Open Swagger",
+
+        f"{FASTAPI_URL}/docs"
+
+    )
+
+with a2:
+
+    st.link_button(
+
+        "Open MLflow",
+
+        MLFLOW_URL
+
+    )
+
+st.info(
+"""
+Use the **Prediction** page from the left sidebar
+to make predictions using the deployed model.
+"""
+)
+
+st.divider()
+
+###############################################################
+# ARTIFACTS
+###############################################################
+
+st.subheader("📁 Latest Artifacts")
+
+p1, p2 = st.columns(2)
+
+with p1:
 
     if os.path.exists(CONFUSION_MATRIX):
 
         st.image(
-            Image.open(CONFUSION_MATRIX),
-            caption="Confusion Matrix"
+
+            CONFUSION_MATRIX,
+
+            caption="Confusion Matrix",
+
+            use_container_width=True
+
         )
 
-with right:
+with p2:
 
     if os.path.exists(ROC_CURVE):
 
         st.image(
-            Image.open(ROC_CURVE),
-            caption="ROC Curve"
+
+            ROC_CURVE,
+
+            caption="ROC Curve",
+
+            use_container_width=True
+
         )
 
 st.divider()
 
-###########################################################
-# FEATURE IMPORTANCE
-###########################################################
+###############################################################
+# FOOTER
+###############################################################
 
-st.header("Feature Importance")
+st.caption(
+"""
+Sports Betting MLOps Platform
 
-if os.path.exists(FEATURE_IMPORTANCE):
-
-    st.dataframe(
-        __import__("pandas").read_csv(
-            FEATURE_IMPORTANCE
-        ),
-        use_container_width=True
-    )
+FastAPI • Streamlit • MLflow • Azure
+"""
+)
