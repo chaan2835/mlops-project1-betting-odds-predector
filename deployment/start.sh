@@ -1,12 +1,16 @@
 #!/bin/bash
 
+mkdir -p /tmp/mlflow
+
 echo "Starting MLflow..."
 
 mlflow server \
 --host 0.0.0.0 \
 --port 5001 \
---backend-store-uri sqlite:///mlflow.db \
---default-artifact-root ./mlruns &
+--backend-store-uri sqlite:////tmp/mlflow/mlflow.db \
+--default-artifact-root /tmp/mlflow/artifacts \
+--allowed-hosts "*" \
+--cors-allowed-origins "*" &
 
 echo "Starting FastAPI..."
 

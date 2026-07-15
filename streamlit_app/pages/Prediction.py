@@ -160,7 +160,8 @@ if st.button(
             if response.status_code == 200:
 
                 result = response.json()
-
+                st.write("Status Code:", response.status_code)
+                
                 prediction = result["Prediction_Correct"]
 
                 probability = max(result["Probability"][0])
