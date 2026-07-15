@@ -3,6 +3,7 @@ from src.logger import logger
 from src.components.data_ingestion import DataIngestion
 from src.components.data_validation import validate_dataset
 from src.components.model_trainer import ModelTrainer
+from src.EDA.eda import run_eda
 
 
 def main():
@@ -32,10 +33,17 @@ def main():
         validate_dataset()
 
         ####################################################
+        # EDA
+        ####################################################
+        
+        logger.info("Step 3 : EDA")
+        run_eda()
+
+        ####################################################
         # Model Training
         ####################################################
 
-        logger.info("Step 3 : Model Training")
+        logger.info("Step 4 : Model Training")
 
         trainer = ModelTrainer()
 
