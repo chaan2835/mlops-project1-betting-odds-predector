@@ -6,6 +6,7 @@ import pandas as pd
 
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
+from xgboost import XGBClassifier
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import (
@@ -112,6 +113,26 @@ class ModelTrainer:
 
             ).astype(int)
 
+            df["Date"] = pd.to_datetime(df["Date"])
+
+            df["Year"] = df["Date"].dt.year
+            df["Month"] = df["Date"].dt.month
+            df["DayOfWeek"] = df["Date"].dt.dayofweek
+
+            df["Odds_Difference"] = abs(
+                df["Home_Team_Odds"]
+                -
+                df["Away_Team_Odds"]
+            )
+
+            df["Home_Probability"] = (
+                1 / df["Home_Team_Odds"]
+            )
+
+            df["Away_Probability"] = (
+                1 / df["Away_Team_Odds"]
+            )
+
             print("\nTarget Distribution\n")
 
             print(
@@ -204,30 +225,24 @@ class ModelTrainer:
             ####################################################
 
             numerical_columns = [
-
                 "Home_Team_Odds",
-
                 "Away_Team_Odds",
-
-                "Draw_Odds"
-
+                "Draw_Odds",
+                "Year",
+                "Month",
+                "DayOfWeek",
+                "Odds_Difference",
+                "Home_Probability",
+                "Away_Probability"
             ]
 
             categorical_columns = [
-
-                "Match_ID",
-
-                "Date",
-
                 "Sport",
-
                 "Home_Team",
-
                 "Away_Team",
-
                 "Predicted_Winner"
-
             ]
+                
 
             ####################################################
             # Numeric Pipeline
@@ -409,6 +424,17 @@ class ModelTrainer:
 
                     random_state=42
 
+                ),
+
+                "XGBoost": XGBClassifier(
+                    n_estimators=500,
+                    max_depth=6,
+                    learning_rate=0.05,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    objective="binary:logistic",
+                    eval_metric="logloss",
+                    random_state=42
                 ),
 
                 "Extra Trees": ExtraTreesClassifier(
