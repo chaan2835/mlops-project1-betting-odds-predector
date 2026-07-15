@@ -378,8 +378,8 @@ class ModelTrainer:
             # Initialize MLflow
             ####################################################
    
-            mlflow.start_run(
-                run_name=MLFLOW_RUN_NAME
+            self.mlflow_logger.start_run(
+                MLFLOW_RUN_NAME
             )
 
             ####################################################

@@ -48,13 +48,13 @@ class MLflowLogger:
     ####################################################
     # Enable Auto Logging
     ####################################################
-def enable_autolog(self):
+    def enable_autolog(self):
 
-    logger.info(
-        "MLflow Autolog Disabled"
-    )
+        logger.info(
+            "MLflow Autolog Disabled"
+        )
 
-    return    
+        return    
 
     ####################################################
     # Start Run
