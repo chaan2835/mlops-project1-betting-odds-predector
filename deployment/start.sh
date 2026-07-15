@@ -2,6 +2,16 @@
 
 mkdir -p /tmp/mlflow
 
+#################################################
+# Train model if not available
+#################################################
+if [ ! -f artifacts/models/model.pkl ]; then
+    echo "Model not found. Training model..."
+    python main.py
+else
+    echo "Model already exists. Skipping training."
+fi
+
 echo "Starting MLflow..."
 
 mlflow server \
