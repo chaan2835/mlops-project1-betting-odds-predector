@@ -57,17 +57,7 @@ class MLflowLogger:
                 "Enabling MLflow Auto Logging"
             )
 
-            mlflow.sklearn.autolog(
-
-                log_models=False,
-
-                #log_input_examples=True,
-
-                #log_model_signatures=True,
-
-                silent=False
-
-            )
+            return
 
         except Exception as e:
 

@@ -163,7 +163,7 @@ class ModelTrainer:
 
             )
 
-            y = df["Prediction_Correct"]
+            y = df["Prediction_Correct"].to_numpy()
 
             ####################################################
             # Train Test Split
@@ -675,50 +675,41 @@ class ModelTrainer:
 
             metrics = {
 
-                "best_model": best_model_name,
-
                 "accuracy": round(
-
                     model_report[best_model_name]["accuracy"],
-
                     4
-
                 ),
 
                 "precision": round(
-
                     model_report[best_model_name]["precision"],
-
                     4
-
                 ),
 
                 "recall": round(
-
                     model_report[best_model_name]["recall"],
-
                     4
-
                 ),
 
                 "f1_score": round(
-
                     model_report[best_model_name]["f1_score"],
-
                     4
-
                 ),
 
                 "roc_auc": round(
-
                     model_report[best_model_name]["roc_auc"],
-
                     4
-
                 )
-
             }
 
+            self.mlflow_logger.log_parameters(
+                {
+                    "Best_Model": best_model_name,
+                    "Training_Samples": len(y_train),
+                    "Testing_Samples": len(y_test),
+                    "Numerical_Features": len(numerical_columns),
+                    "Categorical_Features": len(categorical_columns)
+                }
+            )
             ####################################################
             # Save metrics.json
             ####################################################
