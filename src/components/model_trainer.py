@@ -633,15 +633,15 @@ class ModelTrainer:
             # Register Best Model
             ####################################################
 
-            self.mlflow_logger.register_model(
+            # self.mlflow_logger.register_model(
 
-                best_model,
+            #     best_model,
 
-                "Sports_Betting_Model"
+            #     "Sports_Betting_Model"
 
-            )
+            # )
 
-                        ####################################################
+            ####################################################
             # Save Metrics
             ####################################################
 

@@ -79,10 +79,7 @@ def validate_dataset():
 
                 mean_value = df[col].mean()
 
-                df[col].fillna(
-                    mean_value,
-                    inplace=True
-                )
+                df[col] = df[col].fillna(mean_value)
 
                 logger.info(
                     f"{col} missing values filled with mean: {mean_value:.4f}"
