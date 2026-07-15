@@ -4,6 +4,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ####################################################
+# MLFLOW
+####################################################
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI"
+)
+MLFLOW_EXPERIMENT_NAME = os.getenv(
+    "MLFLOW_EXPERIMENT_NAME"
+)
+MLFLOW_REGISTERED_MODEL_NAME = os.getenv(
+    "MLFLOW_REGISTERED_MODEL_NAME"
+)
+
+####################################################
 # PROJECT ROOT
 ####################################################
 
