@@ -13,7 +13,7 @@ asyncssh==2.24.0
 atpublic==7.0.0
 attrs==26.1.0
 # Editable install with no version control (betting_odds_predictor==1.0.0)
-#-e c:\users\chand\downloads\dimpu\dimpu\mlops-practise\project-1-sports-betting-odds-predector
+-e c:\users\chand\downloads\dimpu\dimpu\mlops-practise\project-1-sports-betting-odds-predector
 billiard==4.2.4
 blinker==1.9.0
 cachetools==7.1.4
@@ -139,7 +139,7 @@ pytest==9.1.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 pytz==2026.2
-#pywin32==312
+pywin32==312
 PyYAML==6.0.3
 regex==2026.6.28
 requests==2.34.2
