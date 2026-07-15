@@ -13,5 +13,3 @@ __pycache__/
 models/*.pkl
 
 .ipynb_checkpoints/
-
-.env
