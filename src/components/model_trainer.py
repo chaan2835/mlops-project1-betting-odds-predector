@@ -781,7 +781,8 @@ class ModelTrainer:
             # Close MLflow Run
             ####################################################
 
-            self.mlflow_logger.end_run()
+            if mlflow.active_run():
+                mlflow.end_run()
 
             ####################################################
             # Console Output
@@ -865,6 +866,6 @@ class ModelTrainer:
 
             if mlflow.active_run():
 
-                self.mlflow_logger.end_run()
+                mlflow.end_run()
 
             raise CustomException(e, sys)
