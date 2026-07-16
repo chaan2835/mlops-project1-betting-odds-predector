@@ -145,73 +145,64 @@ if st.button(
 
     with st.spinner("Calling FastAPI..."):
 
-        try:
+    try:
 
-            response = requests.post(
+        response = requests.post(
+            f"{FASTAPI_URL}/predict",
+            json=payload,
+            timeout=30
+        )
 
-                f"{FASTAPI_URL}/predict",
+        if response.status_code != 200:
 
-                json=payload,
-
-                timeout=30
-
+            st.error(
+                f"API Error: {response.text}"
             )
 
-            if response.status_code == 200:
+            st.stop()
 
-                result = response.json()
+        result = response.json()
 
-            else:
+        prediction = result["Prediction_Correct"]
 
-                st.error(
-                    f"API Error: {response.text}"
-                )
+        probability = max(
+            result["Probability"][0]
+        )
 
-                st.stop()
-                st.write("Status Code:", response.status_code)
-                
-                prediction = result["Prediction_Correct"]
+        st.success(
+            "Prediction Completed"
+        )
 
-                probability = max(result["Probability"][0])
+        c1, c2 = st.columns(2)
 
-                st.success("Prediction Completed")
+        with c1:
 
-                c1, c2 = st.columns(2)
+            st.metric(
+                "Prediction",
+                "Correct ✅"
+                if prediction == 1
+                else "Incorrect ❌"
+            )
 
-                with c1:
+        with c2:
 
-                    st.metric(
+            st.metric(
+                "Confidence",
+                f"{probability * 100:.2f}%"
+            )
 
-                        "Prediction",
+        with st.expander(
+            "Request Sent To FastAPI"
+        ):
 
-                        "Correct ✅"
-                        if prediction == 1
-                        else "Incorrect ❌"
+            st.json(payload)
 
-                    )
+        with st.expander(
+            "Response"
+        ):
 
-                with c2:
+            st.json(result)
 
-                    st.metric(
+    except Exception as e:
 
-                        "Confidence",
-
-                        f"{probability*100:.2f}%"
-
-                    )
-
-                with st.expander("Request Sent To FastAPI"):
-
-                    st.json(payload)
-
-                with st.expander("Response"):
-
-                    st.json(result)
-
-            else:
-
-                st.error(response.text)
-
-        except Exception as e:
-
-            st.error(str(e))
+        st.error(str(e))
