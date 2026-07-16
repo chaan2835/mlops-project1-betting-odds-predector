@@ -33,38 +33,8 @@ class PredictionPipeline:
 
             logger.info("Transforming Input Data")
 
-            input_df["Date"] = pd.to_datetime(
-            input_df["Date"]
-            )
-
-            input_df["Year"] = (
-                input_df["Date"].dt.year
-            )
-
-            input_df["Month"] = (
-                input_df["Date"].dt.month
-            )
-
-            input_df["DayOfWeek"] = (
-                input_df["Date"].dt.dayofweek
-            )
-
-            input_df["Odds_Difference"] = abs(
-                input_df["Home_Team_Odds"]
-                -
-                input_df["Away_Team_Odds"]
-            )
-
-            input_df["Home_Probability"] = (
-                1 / input_df["Home_Team_Odds"]
-            )
-
-            input_df["Away_Probability"] = (
-                1 / input_df["Away_Team_Odds"]
-            )
-
             input_df = create_features(input_df)
-            
+
             transformed = self.preprocessor.transform(input_df)
 
             logger.info("Predicting")

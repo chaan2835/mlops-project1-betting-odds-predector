@@ -160,6 +160,9 @@ if st.button(
 
                 st.stop()
 
+            st.write("Status Code:",response.status_code)
+
+            st.code(response.text)    
             result = response.json()
      
             prediction = result["Prediction_Correct"]
