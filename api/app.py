@@ -85,10 +85,33 @@ def predict(data: MatchData):
 
         prediction, probability = pipeline.predict(df)
 
+        odds = {
+
+            data.Home_Team: data.Home_Team_Odds,
+
+            data.Away_Team: data.Away_Team_Odds,
+
+            "Draw": data.Draw_Odds
+
+        }
+
+        likely_winner = min(
+            odds,
+            key=odds.get
+        )
+
         return {
+
             "success": True,
-            "Prediction_Correct": int(prediction[0]),
-            "Probability": probability.tolist()
+
+            "Prediction_Correct": int(
+                prediction[0]
+            ),
+
+            "Probability": probability.tolist(),
+
+            "Likely_Winner": likely_winner
+
         }
 
     except Exception as e:

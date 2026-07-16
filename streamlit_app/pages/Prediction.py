@@ -167,15 +167,16 @@ if st.button(
      
             prediction = result["Prediction_Correct"]
 
-            probability = max(
-                result["Probability"][0]
-            )
+            probability = result["Probability"][0][1]
+
+            likely_winner = result["Likely_Winner"]
+
 
             st.success(
                 "Prediction Completed"
             )
 
-            c1, c2 = st.columns(2)
+            c1, c2, c3 = st.columns(3)
 
             with c1:
 
@@ -191,6 +192,13 @@ if st.button(
                 st.metric(
                     "Confidence",
                     f"{probability * 100:.2f}%"
+                )
+            
+            with c3:
+
+                st.metric(
+                    "Likely Winner",
+                    likely_winner
                 )
 
             with st.expander(
