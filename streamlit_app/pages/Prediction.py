@@ -153,16 +153,15 @@ if st.button(
                 timeout=30
             )
 
-            if response.status_code != 200:
+            st.write("Status Code:", response.status_code)
+            st.code(response.text)
 
-                st.error(
-                    f"API Error: {response.text}"
-                )
+            if response.status_code != 200:
 
                 st.stop()
 
             result = response.json()
-
+     
             prediction = result["Prediction_Correct"]
 
             probability = max(
