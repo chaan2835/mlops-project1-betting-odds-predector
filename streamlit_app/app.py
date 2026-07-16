@@ -23,6 +23,7 @@ st.set_page_config(
 FASTAPI_URL = os.getenv("FASTAPI_URL")
 MLFLOW_URL = os.getenv("MLFLOW_URL")
 AZURE_ML_WORKSPACE_URL = os.getenv("AZURE_ML_WORKSPACE_URL")
+FASTAPI_PUBLIC_URL = os.getenv("FASTAPI_PUBLIC_URL")
 
 ###############################################################
 # PROJECT PATHS
@@ -219,7 +220,8 @@ with a1:
 
         "Open Swagger",
 
-        f"{FASTAPI_URL}/docs"
+        #f"{FASTAPI_URL}/docs"
+        f"{FASTAPI_PUBLIC_URL}/docs"
 
     )
 
