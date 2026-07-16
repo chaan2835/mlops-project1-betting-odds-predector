@@ -22,6 +22,7 @@ st.set_page_config(
 
 FASTAPI_URL = os.getenv("FASTAPI_URL")
 MLFLOW_URL = os.getenv("MLFLOW_URL")
+AZURE_ML_WORKSPACE_URL = os.getenv("AZURE_ML_WORKSPACE_URL")
 
 ###############################################################
 # PROJECT PATHS
@@ -225,12 +226,8 @@ with a1:
 with a2:
 
     st.link_button(
-
-        "Open MLflow",
-
-        #MLFLOW_URL
-        https://ml.azure.com/
-
+        "Open MLFlow",
+        AZURE_ML_WORKSPACE_URL
     )
 
 st.info(
