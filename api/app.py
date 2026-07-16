@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi import HTTPException
 
 import pandas as pd
 
@@ -64,39 +65,35 @@ def home():
 ##########################################################
 
 @app.post("/predict")
-
 def predict(data: MatchData):
 
-    df = pd.DataFrame([{
+    try:
 
-        "Match_ID": data.Match_ID,
+        df = pd.DataFrame([{
+            "Match_ID": data.Match_ID,
+            "Date": data.Date,
+            "Sport": data.Sport,
+            "Home_Team": data.Home_Team,
+            "Away_Team": data.Away_Team,
+            "Home_Team_Odds": data.Home_Team_Odds,
+            "Away_Team_Odds": data.Away_Team_Odds,
+            "Draw_Odds": data.Draw_Odds,
+            "Predicted_Winner": data.Predicted_Winner
+        }])
 
-        "Date": data.Date,
+        pipeline = PredictionPipeline()
 
-        "Sport": data.Sport,
+        prediction, probability = pipeline.predict(df)
 
-        "Home_Team": data.Home_Team,
+        return {
+            "success": True,
+            "Prediction_Correct": int(prediction[0]),
+            "Probability": probability.tolist()
+        }
 
-        "Away_Team": data.Away_Team,
+    except Exception as e:
 
-        "Home_Team_Odds": data.Home_Team_Odds,
-
-        "Away_Team_Odds": data.Away_Team_Odds,
-
-        "Draw_Odds": data.Draw_Odds,
-
-        "Predicted_Winner": data.Predicted_Winner
-
-    }])
-
-    pipeline = PredictionPipeline()
-
-    prediction, probability = pipeline.predict(df)
-
-    return {
-
-        "Prediction_Correct": int(prediction[0]),
-
-        "Probability": probability.tolist()
-
-    }
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )

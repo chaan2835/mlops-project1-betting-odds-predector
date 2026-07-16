@@ -160,6 +160,14 @@ if st.button(
             if response.status_code == 200:
 
                 result = response.json()
+
+            else:
+
+                st.error(
+                    f"API Error: {response.text}"
+                )
+
+                st.stop()
                 st.write("Status Code:", response.status_code)
                 
                 prediction = result["Prediction_Correct"]

@@ -228,7 +228,8 @@ with a2:
 
         "Open MLflow",
 
-        MLFLOW_URL
+        #MLFLOW_URL
+        https://ml.azure.com/
 
     )
 
