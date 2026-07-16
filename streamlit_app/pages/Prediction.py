@@ -205,4 +205,6 @@ if st.button(
 
         except Exception as e:
 
-            st.error(str(e))
+            st.error(
+                f"Prediction Error: {str(e)}"
+            )
