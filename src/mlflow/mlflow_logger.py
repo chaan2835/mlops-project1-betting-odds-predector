@@ -91,19 +91,11 @@ class MLflowLogger:
             for artifact in artifact_list:
 
                 if os.path.exists(artifact):
-                    print("OS path exists")
 
-                    logger.info(
-                        f"Uploading : {artifact}"
-                    )
+                    logger.info(f"Uploading : {artifact}")
 
-                    print("xxxxxxxxxxxx")
+                    mlflow.log_artifact(artifact)
 
-                    mlflow.log_artifact(
-                        artifact
-                    )
-
-                    print("xxxxxxxxxxxxx")
 
             logger.info(
                 "Artifacts Logged Successfully")
