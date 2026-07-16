@@ -588,22 +588,6 @@ class ModelTrainer:
             )
 
             ####################################################
-            # Log Custom Artifacts
-            ####################################################
-
-            artifact_files = [TRAIN_DATA_PATH,TEST_DATA_PATH,
-
-                CLASSIFICATION_REPORT_PATH,FEATURE_IMPORTANCE_PATH,
-
-                CONFUSION_MATRIX_PATH,ROC_CURVE_PATH]
-
-            self.mlflow_logger.log_artifacts(
-
-                artifact_files
-
-            )
-
-            ####################################################
             # Log Tags
             ####################################################
 
@@ -677,6 +661,36 @@ class ModelTrainer:
 
                 "metrics.json Saved Successfully"
 
+            )
+
+            ####################################################
+            # Versioned Metrics
+            ####################################################
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+            metrics_path = os.path.join(os.path.dirname(METRICS_PATH),
+                f"metrics_{timestamp}.json")
+
+            save_json(metrics_path,metrics)
+
+            ####################################################
+            # Log All Artifacts
+            ####################################################
+
+            artifact_files = [
+                TRAIN_DATA_PATH,
+                TEST_DATA_PATH,
+                METRICS_PATH,
+                metrics_path,
+                CLASSIFICATION_REPORT_PATH,
+                FEATURE_IMPORTANCE_PATH,
+                CONFUSION_MATRIX_PATH,
+                ROC_CURVE_PATH
+            ]
+
+            self.mlflow_logger.log_artifacts(
+                artifact_files
             )
 
             ####################################################
